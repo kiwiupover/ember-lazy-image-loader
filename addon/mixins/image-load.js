@@ -1,22 +1,15 @@
-import Ember from 'ember';
-
-const {
-  computed,
-  getWithDefault,
-  Mixin,
-  run,
-  set
-} = Ember;
+import Mixin from '@ember/object/mixin';
+import { run } from '@ember/runloop';
+import { set, getWithDefault, computed } from '@ember/object';
 
 export default Mixin.create({
+  errorThrown: false,
+
   init() {
     this._super(...arguments);
     this.loaded = false;
-    this.errorThrown = false;
     this.listenersNotSet = true;
   },
-
-  classNameBindings: ['loaded', 'errorThrown'],
 
   defaultErrorText: computed('errorText', function() {
     return getWithDefault(this, 'errorText', 'Image failed to load');

@@ -1,0 +1,122 @@
+version: 2.0
+references:
+  container_config: &container_config
+    docker:
+      - image: jheth/cci-node6-browsers-npm571-yarn
+        environment:
+          JOBS: 2
+    working_directory: ~/ember-lazy-image-loader
+
+  restore_repo: &restore_repo
+    restore_cache:
+      keys:
+        - v1-repo-{{ .Branch }}-{{ .Revision }}
+        - v1-repo-{{ .Branch }}
+        - v1-repo
+
+  restore_node_modules: &restore_node_modules
+    restore_cache:
+      keys:
+        - v1-dependencies-{{ checksum "package.json" }}
+        - v1-dependencies
+
+jobs:
+  checkout_code:
+    <<: *container_config
+    steps:
+      - *restore_repo
+      - checkout
+      - save_cache:
+          key: v1-repo-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .
+
+      - run: yarn
+      - save_cache:
+          key: v1-dependencies-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+
+  test-release:
+    <<: *container_config
+    steps:
+      - *restore_repo
+      - *restore_node_modules
+      - run: node_modules/.bin/ember try:one ember-release --skip-cleanup
+
+  test-beta:
+    <<: *container_config
+    steps:
+      - *restore_repo
+      - *restore_node_modules
+      - run: node_modules/.bin/ember try:one ember-beta --skip-cleanup
+
+  ember-lts-2.12:
+    <<: *container_config
+    steps:
+      - *restore_repo
+      - *restore_node_modules
+      - run: node_modules/.bin/ember try:one ember-lts-2.12 --skip-cleanup
+
+  ember-lts-2.16:
+    <<: *container_config
+    steps:
+      - *restore_repo
+      - *restore_node_modules
+      - run: node_modules/.bin/ember try:one ember-lts-2.16 --skip-cleanup
+
+  ember-lts-2.18:
+    <<: *container_config
+    steps:
+      - *restore_repo
+      - *restore_node_modules
+      - run: node_modules/.bin/ember try:one ember-lts-2.18 --skip-cleanup
+
+  test-canary:
+    <<: *container_config
+    steps:
+      - *restore_repo
+      - *restore_node_modules
+      - run: node_modules/.bin/ember try:one ember-canary --skip-cleanup
+
+  test-default:
+    <<: *container_config
+    steps:
+      - *restore_repo
+      - *restore_node_modules
+      - run: node_modules/.bin/ember try:one ember-default --skip-cleanup
+
+workflows:
+  version: 2
+
+  build_test:
+    jobs:
+      - checkout_code
+
+      - test-default:
+          requires:
+            - checkout_code
+
+      - test-release:
+          requires:
+            - checkout_code
+
+      - test-beta:
+          requires:
+            - checkout_code
+
+      - ember-lts-2.12:
+          requires:
+            - checkout_code
+
+      - ember-lts-2.16:
+          requires:
+            - checkout_code
+
+      - ember-lts-2.18:
+          requires:
+            - checkout_code
+
+      - test-canary:
+          requires:
+            - checkout_code

@@ -1,10 +1,14 @@
-import Ember from 'ember';
-import Cache from '../lib/cache';
+import Mixin from '@ember/object/mixin';
+import { dasherize } from '@ember/string';
+import { setProperties, computed, set, get } from '@ember/object';
 
-const { on, get, set, Mixin, computed, setProperties } = Ember;
-const dasherize = Ember.String.dasherize;
+import { storageFor } from 'ember-local-storage';
 
 export default Mixin.create({
+  _cache: storageFor('cache', { legacyKey: 'ember-lazy-images-loader' }),
+
+  lazyUrl: null,
+
   didInsertElement() {
     setProperties(this, {
       viewportScrollSensitivity: 20,
@@ -18,19 +22,15 @@ export default Mixin.create({
     this._super(...arguments);
   },
 
-  _cache: Cache.create(),
-
-  lazyUrl: null,
-
-  handleDidRender: on('didRender', function() {
+  didRender() {
+    this._super(...arguments);
     this._setupAttributes();
-  }),
+  },
 
-  handleImageUrl: on('init', function() {
-    this._setImageUrl();
-  }),
 
-  _setImageUrl: on('didEnterViewport', function() {
+  didEnterViewport(){
+    if (this.isDestroying || this.isDestroyed) { return; }
+
     const url             = get(this, 'url');
     const cache           = get(this, '_cache');
     const lazyUrl         = get(this, 'lazyUrl');
@@ -38,28 +38,36 @@ export default Mixin.create({
     const viewportEntered = get(this, 'viewportEntered');
 
     if (cacheKey && get(cache, cacheKey)) {
-      set(this, 'lazyUrl', url);
+      this._safeSet('lazyUrl', url);
     }
 
     if (viewportEntered && lazyUrl === null) {
-      set(this, 'lazyUrl', url);
+      this._safeSet('lazyUrl', url);
 
       if (cacheKey) {
-        set(cache, cacheKey, true);
+        if (!(this.isDestroying || this.isDestroyed)) {
+          set(cache, cacheKey, true);
+        }
       }
     }
-  }),
+  },
 
   _cacheKey: computed('url', function() {
     var url = this.get('url');
     var key;
 
     if (url) {
-      key = dasherize(url.toString().replace(/^http[s]?\:\/\/|\.|\//g, ''));
+      key = dasherize(url.toString().replace(/^http[s]?:\/\/|\.|\//g, ''));
     }
 
     if (key) {
       return key;
     }
-  })
+  }),
+
+  _safeSet(key, val) {
+    if (!(this.isDestroying || this.isDestroyed)) {
+      set(this, key, val);
+    }
+  }
 });
