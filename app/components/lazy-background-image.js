@@ -1,2 +1,1 @@
-import LazyBackgroundImage from 'ember-lazy-image/components/lazy-background-image';
-export default LazyBackgroundImage;
+export { default } from 'ember-lazy-image-loader/components/lazy-background-image';

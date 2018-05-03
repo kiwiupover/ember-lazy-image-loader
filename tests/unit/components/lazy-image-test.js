@@ -1,148 +1,108 @@
-import Ember from 'ember';
-import {
-  moduleForComponent,
-  test
-} from 'ember-qunit';
+import { get } from '@ember/object';
+import { module, test } from 'qunit';
+import { setupRenderingTest } from 'ember-qunit';
+import { find, render, settled } from '@ember/test-helpers';
 
-import Cache from 'ember-lazy-image/lib/cache';
 import hbs from 'htmlbars-inline-precompile';
 
-moduleForComponent('lazy-image', 'LazyImageComponent', {
-  unit: true,
+module('Integration | Component | lazy-image', function(hooks) {
+  setupRenderingTest(hooks);
 
-  beforeEach() {
+  hooks.beforeEach(function() {
     window.sessionStorage.clear();
-  }
-});
-
-const { run } = Ember;
-const get = Ember.get;
-
-const imageSelector          = '.lazy-image';
-const placeholderSelector    = '.lazy-image-placeholder';
-const errorMessageSelector   = '.lazy-image-error-message';
-const imageContainerSelector = '.lazy-image-container';
-
-test('it has correct defaults', function(assert) {
-  assert.expect(5);
-
-  const component = this.subject();
-
-  assert.equal(get(component, 'loaded'),           false);
-  assert.equal(get(component, 'errorThrown'),      false);
-  assert.equal(get(component, 'lazyUrl'),          null);
-  assert.equal(get(component, 'defaultErrorText'), 'Image failed to load');
-  assert.equal(get(component, 'class'),            'lazy-image');
-});
-
-test('it renders default placeholder', function(assert) {
-  assert.expect(1);
-
-  this.render(hbs`{{lazy-image}}`);
-
-  assert.ok(this.$(placeholderSelector).length > 0, 'placeholder is correctly rendered');
-});
-
-test('it renders default error message if image fails to load', function(assert) {
-  assert.expect(2);
-
-  const component = this.subject({
-    errorThrown: true
   });
 
-  this.render();
+  const placeholderSelector    = '.lazy-image-placeholder';
+  const errorMessageSelector   = '.lazy-image-error-message';
 
-  assert.ok(component.$(errorMessageSelector).length > 0, 'error message is correctly rendered');
-  assert.ok(component.$(errorMessageSelector + ':contains("' + 'Image failed to load' + '")'), 'default error message is rendered correctly');
-});
+  test('it has correct defaults', async function(assert) {
+    assert.expect(5);
 
-test('it leverages cache', function(assert) {
-  run(() => {
-    Cache.create();
+    await render(hbs`{{lazy-image}}`);
+
+    const component = this.owner.lookup('component:lazy-image');
+
+    assert.equal(get(component, 'loaded'),           false);
+    assert.equal(get(component, 'errorThrown'),      false);
+    assert.equal(get(component, 'lazyUrl'),          null);
+    assert.equal(get(component, 'defaultErrorText'), 'Image failed to load');
+    assert.equal(get(component, 'className'),            'lazy-image');
   });
 
-  assert.expect(1);
+  test('it renders default placeholder', async function(assert) {
+    assert.expect(1);
 
-  const component = this.subject({
-    url: 'http://emberjs.com/images/team/tdale.jpg'
+    await render(hbs`{{lazy-image}}`);
+
+    assert.ok(find(placeholderSelector), 'placeholder is correctly rendered');
   });
 
-  this.render();
+  test('it renders default error message if image fails to load', async function(assert) {
+    assert.expect(2);
 
-  run(() => {
-    component.set('viewportEntered', true);
-    component.trigger('didEnterViewport');
+    await render(hbs`{{lazy-image errorThrown=true}}`);
+
+    assert.ok(find(errorMessageSelector), 'error message is correctly rendered');
+    assert.equal(this.element.textContent.trim(), 'Image failed to load', 'default error message is rendered correctly');
   });
 
-  let lazyImages = window.sessionStorage['ember-lazy-images'];
-  let cache = lazyImages ? JSON.parse(lazyImages) : lazyImages;
+  test('it leverages cache', async function(assert) {
+    assert.expect(1);
 
-  assert.deepEqual(cache, {
-    emberjscomimagesteamtdalejpg: true
-  });
-});
+    await render(hbs`{{lazy-image url='https://emberjs.com/images/team/kselden-8c01e5e1.jpg' viewportEntered=true}}`);
 
-test('`width` and `height` bindings work correctly', function(assert) {
-  assert.expect(2);
+    await settled();
 
-  const component = this.subject({
-    width: 400,
-    height: 400
-  });
+    let lazyImages = window.sessionStorage['ember-lazy-images-loader']
+    let cache = lazyImages ? JSON.parse(lazyImages) : lazyImages;
 
-  this.render();
-
-  assert.equal(component.$('img').attr('width'), 400, 'width is correct');
-  assert.equal(component.$('img').attr('height'), 400, 'height is correct');
-});
-
-test('`width` and `height` are not used if set to 0 or unset', function(assert) {
-  assert.expect(2);
-
-  const component = this.subject({
-    width: 400
+    assert.deepEqual(cache, {
+      'emberjscomimagesteamkselden-8c01e5e1jpg': true
+    });
   });
 
-  this.render();
+  test('`width` and `height` bindings work correctly', async function(assert) {
+    assert.expect(2);
 
-  assert.equal(component.$('img').attr('width'), undefined, 'width is not used');
-  assert.equal(component.$('img').attr('height'), undefined, 'height is not used');
-});
+    await render(hbs`{{lazy-image width=400 height=400}}`);
 
-test('`data-*` attribute bindings work correctly', function(assert) {
-  assert.expect(1);
-
-  const component = this.subject({
-    'data-person-id': 1234
+    let image = find('img');
+    assert.equal(image.width, 400, 'width is correct');
+    assert.equal(image.height, 400, 'height is correct');
   });
 
-  this.render();
+  test('`width` and `height` are not used if set to 0 or unset', async function(assert) {
+    assert.expect(2);
 
-  assert.equal(component.$('img').attr('data-person-id'), 1234, 'data attribute is correct');
-});
+    await render(hbs`{{lazy-image width=400}}`);
 
-test('passing class names for the <img> element', function(assert) {
-  assert.expect(1);
-
-  const component = this.subject({
-    class: 'img-responsive image-thumbnail'
+    let image = find('img');
+    assert.notOk(image.width, 'width is not used');
+    assert.notOk(image.height, 'height is not used');
   });
 
-  this.render();
+  test('`data-*` attribute bindings work correctly', async function(assert) {
+    assert.expect(1);
 
-  const expected = 'lazy-image img-responsive image-thumbnail';
-  assert.equal(component.$('img').attr('class'), expected);
-});
+    await render(hbs`{{lazy-image data-person-id=1234}}`);
 
-test('passing alt attribute for the <img> element', function(assert) {
-  assert.expect(1);
-
-  const component = this.subject({
-    alt: 'alternate text'
+    assert.equal(find('img').dataset.personId, 1234, 'data attribute is correct');
   });
 
-  this.render();
+  test('passing class names for the <img> element', async function(assert) {
+    assert.expect(2);
 
-  const expected = 'alternate text';
-  assert.equal(component.$('img').attr('alt'), expected);
+    await render(hbs`{{lazy-image class='img-responsive image-thumbnail'}}`);
+
+    assert.ok(find('img').classList.contains('img-responsive'));
+    assert.ok(find('img').classList.contains('image-thumbnail'));
+  });
+
+  test('passing alt attribute for the <img> element', async function(assert) {
+    assert.expect(1);
+
+    await render(hbs`{{lazy-image alt='alternate text'}}`);
+
+    assert.equal(find('img').alt, 'alternate text');
+  });
 });

@@ -1,8 +1,10 @@
-# ember-lazy-image
+# ember-lazy-image-loader
 
-[![Build Status](https://travis-ci.org/twokul/ember-lazy-image.svg)](https://travis-ci.org/twokul/ember-lazy-image)
 
-`ember-lazy-image` is a component that allows you to gracefully handle image loading.
+![CircleCI branch](https://img.shields.io/circleci/project/github/kiwiupover/ember-lazy-image-loader/master.svg?style=for-the-badge)
+
+`ember-lazy-image-loader` is a modern fork of the great work by [twokul](https://github.com/twokul/ember-lazy-image)
+`ember-lazy-image-loader` is a component that allows you to gracefully handle image loading.
 
 Component will load images lazily, only if they appeared in the view port.
 This optimization brings page load time down.
@@ -14,19 +16,9 @@ Default loading placeholder is stolen from [aurer](https://github.com/aurer) and
 From inside your ember-cli project, run the following:
 
 ```bash
-ember install ember-lazy-image
+ember install ember-lazy-image-loader
 ```
 
-#### Installation for ember-cli 0.1.5 - 0.2.2
-
-```bash
-ember install:addon ember-lazy-image
-```
-
-#### Installation without ember-cli
-
-```bash
-npm install ember-lazy-image --save
 ```
 
 ### lazy-image
@@ -118,22 +110,33 @@ sets `min-height` attribute to `270px` so the image is visible. You should be ab
 
 ## Installation
 
-* `git clone` this repository
-* `npm install`
-* `bower install`
+* `git clone https://github.com/kiwiupover/ember-lazy-image-loader.git` this repository
+* `yarn install`
 
 ## Running
 
 * `ember server`
 * Visit your app at http://localhost:4200.
 
-## Running Tests
+### Linting
 
-* `ember test`
-* `ember test --server`
+* `npm run lint:js`
+* `npm run lint:js -- --fix`
 
-## Building
+### Running tests
 
-* `ember build`
+* `ember test` – Runs the test suite on the current Ember version
+* `ember test --server` – Runs the test suite in "watch mode"
+* `ember try:each` – Runs the test suite against multiple Ember versions
 
-For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
+### Running the dummy application
+
+* `ember serve`
+* Visit the dummy application at [http://localhost:4200](http://localhost:4200).
+
+For more information on using ember-cli, visit [https://ember-cli.com/](https://ember-cli.com/).
+
+License
+------------------------------------------------------------------------------
+
+This project is licensed under the [MIT License](LICENSE.md).
