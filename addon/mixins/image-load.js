@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import Mixin from '@ember/object/mixin';
 import { run } from '@ember/runloop';
 import { set, getWithDefault, computed } from '@ember/object';
@@ -19,23 +18,21 @@ export default Mixin.create({
   didRender() {
     this._super(...arguments);
 
-    const image = $('img');
-    const isCached = image[0].complete;
+    const image = this.element.querySelector('img');
+    const isCached = image.complete;
 
     if (isCached) {
       return run.scheduleOnce('afterRender', this, this._safeSet, 'loaded', true);
     }
 
     if (this.listenersNotSet) {
-      image.one('load', () => {
-        image.off('error');
+      image.onload = () => {
         run(null, run.scheduleOnce, 'afterRender', this, this._safeSet, 'loaded', true);
-      });
+      };
 
-      image.one('error', () => {
-        image.off('load');
+      image.onerror = () => {
         run(null, run.scheduleOnce, 'afterRender', this, this._safeSet, 'errorThrown', true);
-      });
+      };
 
       this.listenersNotSet = false;
     }

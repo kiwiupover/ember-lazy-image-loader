@@ -48,15 +48,15 @@ module('Integration | Component | lazy-image', function(hooks) {
 
   test('it leverages cache', async function(assert) {
     assert.expect(1);
-    await render(hbs`{{lazy-image url='https://emberjs.com/images/team/kselden-8c01e5e1.jpg'}}`);
+    await render(hbs`{{lazy-image url='https://emberjs.com/images/team/kselden-abe74f5f4c87ed593201f880553516af.jpg'}}`);
 
     await settled();
-    
+
     let lazyImages = window.sessionStorage['ember-lazy-images-loader']
     let cache = lazyImages ? JSON.parse(lazyImages) : lazyImages;
 
     assert.deepEqual(cache, {
-      'emberjscomimagesteamkselden-8c01e5e1jpg': true
+      'emberjscomimagesteamkselden-abe74f5f4c87ed593201f880553516afjpg': true
     });
   });
 
