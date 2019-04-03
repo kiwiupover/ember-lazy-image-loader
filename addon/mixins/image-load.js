@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import Mixin from '@ember/object/mixin';
 import { run } from '@ember/runloop';
 import { set, getWithDefault, computed } from '@ember/object';
@@ -18,7 +19,7 @@ export default Mixin.create({
   didRender() {
     this._super(...arguments);
 
-    const image = this.$('img');
+    const image = $('img');
     const isCached = image[0].complete;
 
     if (isCached) {

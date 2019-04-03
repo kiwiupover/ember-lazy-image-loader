@@ -48,11 +48,10 @@ module('Integration | Component | lazy-image', function(hooks) {
 
   test('it leverages cache', async function(assert) {
     assert.expect(1);
-
-    await render(hbs`{{lazy-image url='https://emberjs.com/images/team/kselden-8c01e5e1.jpg' viewportEntered=true}}`);
+    await render(hbs`{{lazy-image url='https://emberjs.com/images/team/kselden-8c01e5e1.jpg'}}`);
 
     await settled();
-
+    
     let lazyImages = window.sessionStorage['ember-lazy-images-loader']
     let cache = lazyImages ? JSON.parse(lazyImages) : lazyImages;
 

@@ -1,6 +1,6 @@
 {
   "name": "ember-lazy-image-loader",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Lazy image loading for Ember apps",
   "keywords": [
     "ember-addon",
@@ -24,7 +24,7 @@
   "dependencies": {
     "ember-cli-babel": "^6.6.0",
     "ember-cli-htmlbars": "^2.0.1",
-    "ember-in-viewport": "^3.0.1",
+    "ember-in-viewport": "^3.3.0",
     "ember-local-storage": "1.4.1"
   },
   "devDependencies": {

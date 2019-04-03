@@ -22,12 +22,12 @@ export default Component.extend(InViewportMixin, ImageLoadMixin, LazyImageMixin,
   },
 
   _setupAttributes() {
-    const img       = this.$('img');
+    const img       = this.element.querySelector('img');
     const component = this;
 
     Object.keys(component).forEach((key) => {
       if (key.substr(0, 5) === 'data-' && !key.match(/Binding$/)) {
-        img.attr(key, component.get(key));
+        img.setAttribute(key, component.get(key));
       }
     });
   },

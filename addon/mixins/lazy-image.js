@@ -35,13 +35,12 @@ export default Mixin.create({
     const cache           = get(this, '_cache');
     const lazyUrl         = get(this, 'lazyUrl');
     const cacheKey        = get(this, '_cacheKey');
-    const viewportEntered = get(this, 'viewportEntered');
 
     if (cacheKey && get(cache, cacheKey)) {
       this._safeSet('lazyUrl', url);
     }
 
-    if (viewportEntered && lazyUrl === null) {
+    if (lazyUrl === null) {
       this._safeSet('lazyUrl', url);
 
       if (cacheKey) {
